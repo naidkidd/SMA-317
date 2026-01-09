@@ -146,6 +146,7 @@
             
             {% if user.tempat_lahir_decrypted and user.tanggal_lahir and user.jenis_kelamin_decrypted and user.agama_decrypted and user.alamat_decrypted and user.no_hp_decrypted and user.asal_sekolah_decrypted and user.nama_ayah_decrypted and user.pekerjaan_ayah_decrypted and user.nama_ibu_decrypted and user.pekerjaan_ibu_decrypted and bukti and dokumen_count >= 3 %}
             <form method="POST" action="{{ url_for('selesaikan_pendaftaran') }}" onsubmit="return confirmFinalization()">
+                <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}">
                 <button type="submit" class="btn-finalize">✅ Selesaikan Pendaftaran</button>
             </form>
             {% else %}
