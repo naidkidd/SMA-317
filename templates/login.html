@@ -6,6 +6,7 @@
         <h2>Login Siswa</h2>
  
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}">
             <input type="hidden" name="role" value="siswa">
             
             <div class="form-group">
