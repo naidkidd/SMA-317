@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPDB Online</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% if request.endpoint == 'home' %}homepage-bg{% endif %}">
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">PPDB Online</div>
+            <div class="nav-links">
+                {% if session.user_id %}
+                    <span>Halo, {{ session.nama }} ({{ session.role|title }})</span>
+                    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('home') }}" class="logout-btn">Home</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'error' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Modal Popup Notification -->
+    {% if session.show_popup and session.popup_message %}
+    <div id="notificationModal" class="modal-overlay" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    {% if session.popup_type == 'lulus' %}
+                        🎉 SELAMAT!
+                    {% elif session.popup_type == 'tidak_lulus' %}
+                        ⚠️ PENGUMUMAN
+                    {% else %}
+                        ✅ INFORMASI
+                    {% endif %}
+                </h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-icon">
+                    {% if session.popup_type == 'lulus' %}
+                        🎓
+                    {% elif session.popup_type == 'tidak_lulus' %}
+                        ℹ️
+                    {% else %}
+                        ✅
+                    {% endif %}
+                </div>
+                <div class="modal-message">
+                    {{ session.popup_message|safe }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeModal()">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Fungsi untuk menutup modal
+    function closeModal() {
+        document.getElementById('notificationModal').style.display = 'none';
+        
+        // Kirim request ke server untuk update status
+        fetch('/tutup_popup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        });
+    }
+
+    // Tutup modal jika klik di luar
+    document.getElementById('notificationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Tutup dengan ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+    </script>
+
+    <style>
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.4s ease;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: #A0D787;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .modal-body {
+        padding: 30px;
+        text-align: center;
+    }
+
+    .modal-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    .modal-message {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .modal-message strong {
+        color: #A0D787;
+    }
+
+    .modal-footer {
+        padding: 20px;
+        text-align: center;
+        border-top: 1px solid #eee;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            margin: 10px;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-icon {
+            font-size: 50px;
+        }
+    }
+    </style>
+    {% endif %}
+</body>
+</html>
